@@ -17,15 +17,7 @@ const correspondingMorphTargets = {
   I: "viseme_PP",
 }
 
-export function Avatar(props) {
-  // UI via Leva
-  const { playAudio, script } = useControls({
-    playAudio: false,
-    script: {
-      value: 'audion1',
-      options: ['audion1', 'presentation'],
-    },
-  })
+export function Avatar({ playAudio, script, animation, ...props }) {
 
   // Audio & JSON
   const audio = useMemo(() => new Audio('/audio/' + script + '.ogg'), [script])
@@ -49,9 +41,13 @@ export function Avatar(props) {
   const animations = [angryAnim[0], idleAnim[0], thankfulAnim[0]]
 
   // Animation state
-  const [animation, setAnimation] = React.useState('Idle')
+  const [currentAnimation, setCurrentAnimation] = React.useState('Idle')
   const [prevAnimation, setPrevAnimation] = React.useState(null)
   const { actions } = useAnimations(animations, clone)
+
+  useEffect(() => (
+    setCurrentAnimation(animation)
+  ),[animation])
 
   useEffect(() => {
     // Toujours jouer Idle en boucle
@@ -60,34 +56,34 @@ export function Avatar(props) {
       actions.Idle.setLoop(THREE.LoopRepeat)
     }
     // Crossfade vers Angry ou Thankful
-    if (actions[animation] && animation !== 'Idle') {
-      actions[animation].reset().play()
-      actions[animation].crossFadeFrom(actions.Idle, 0.5, false)
-      actions[animation].setLoop(THREE.LoopOnce)
+    if (actions[currentAnimation] && currentAnimation !== 'Idle') {
+      actions[currentAnimation].reset().play()
+      actions[currentAnimation].crossFadeFrom(actions.Idle, 0.5, false)
+      actions[currentAnimation].setLoop(THREE.LoopOnce)
     }
-    setPrevAnimation(animation)
-  }, [animation, actions])
+    setPrevAnimation(currentAnimation)
+  }, [currentAnimation, actions])
 
   // Audio control
   useEffect(() => {
     if (playAudio) {
       audio.play()
       if(script === 'audion1') {
-        setAnimation('Angry')
+        setCurrentAnimation('Angry')
         setTimeout(() => {
-          setAnimation('Idle')
+          setCurrentAnimation('Idle')
           console.log('Animation ended')
         }, angryAnim[0].duration * 1000) 
       } else if(script === 'presentation') {
-        setAnimation('Thankful')
+        setCurrentAnimation('Thankful')
         setTimeout(() => {
-          setAnimation('Idle')
+          setCurrentAnimation('Idle')
           console.log('Animation ended')
         }, thankfulAnim[0].duration * 1000)
       }
     } else {
       audio.pause()
-      setAnimation('Idle')
+      setCurrentAnimation('Idle')
       console.log('Audio paused')
     }
   }, [playAudio, script])

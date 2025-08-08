@@ -1,8 +1,11 @@
 import { Environment, OrbitControls, useTexture } from "@react-three/drei";
+import { useState } from 'react'
 import { Avatar } from "./Avatar";
+import { AdminPanel } from './AdminPanel'
 import { useThree } from '@react-three/fiber';
 
 export const Experience = () => {
+  const [adminVars, setAdminVars] = useState({ playAudio: false, script: 'audion1', animation: 'Idle' });
 
   const texture = useTexture('/textures/background.png');
   const viewport = useThree((state) => state.viewport);
@@ -15,8 +18,9 @@ export const Experience = () => {
 
   return (
     <>
+      <AdminPanel onChange={setAdminVars} />
       <OrbitControls />
-      <Avatar scale={1} position={[0, -1.4, 3.7]} />
+      <Avatar {...adminVars} scale={1} position={[0, -1.4, 3.7]} />
       <Environment preset="sunset" />
       <mesh position={[0, 0, -1]} scale={[viewport.width * backgroundSize, viewport.height * backgroundSize, 1]}>
         <planeGeometry />
